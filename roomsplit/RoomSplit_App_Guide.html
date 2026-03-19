@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RoomSplit — App Guide</title>
+  <style>
+    /* ── Reset & Base ─────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      font-size: 13px;
+      line-height: 1.6;
+      color: #1e293b;
+      background: #fff;
+    }
+
+    /* ── Print Setup ──────────────────────────────────── */
+    @page {
+      size: A4;
+      margin: 18mm 15mm 18mm 15mm;
+    }
+    @media print {
+      .no-print { display: none !important; }
+      .page-break { page-break-before: always; }
+      body { font-size: 11px; }
+      h1 { font-size: 22px !important; }
+      h2 { font-size: 15px !important; }
+      h3 { font-size: 12px !important; }
+    }
+
+    /* ── Print Button ─────────────────────────────────── */
+    .print-btn {
+      position: fixed;
+      top: 20px; right: 20px;
+      background: #6366f1;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(99,102,241,.35);
+      z-index: 999;
+    }
+    .print-btn:hover { background: #4f46e5; }
+
+    /* ── Layout ───────────────────────────────────────── */
+    .container {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 40px 32px;
+    }
+
+    /* ── Cover ────────────────────────────────────────── */
+    .cover {
+      text-align: center;
+      padding: 60px 0 50px;
+      border-bottom: 3px solid #6366f1;
+      margin-bottom: 40px;
+    }
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 80px; height: 80px;
+      background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+      border-radius: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 8px 24px rgba(99,102,241,.35);
+    }
+    .logo span {
+      font-size: 26px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -1px;
+    }
+    .cover h1 {
+      font-size: 36px;
+      font-weight: 800;
+      color: #1e293b;
+      letter-spacing: -1px;
+    }
+    .cover .subtitle {
+      font-size: 15px;
+      color: #64748b;
+      margin-top: 8px;
+    }
+    .cover .version {
+      display: inline-block;
+      margin-top: 16px;
+      background: #f1f5f9;
+      color: #475569;
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    /* ── Section Headings ─────────────────────────────── */
+    h2 {
+      font-size: 17px;
+      font-weight: 700;
+      color: #1e293b;
+      margin: 36px 0 14px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    h2 .icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px; height: 28px;
+      background: #eef2ff;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    h3 {
+      font-size: 13px;
+      font-weight: 700;
+      color: #334155;
+      margin: 20px 0 8px;
+    }
+
+    /* ── Paragraphs & Lists ───────────────────────────── */
+    p { margin-bottom: 10px; color: #475569; }
+    ul, ol { padding-left: 20px; margin-bottom: 12px; }
+    li { margin-bottom: 5px; color: #475569; }
+    li strong { color: #1e293b; }
+
+    /* ── Callout Boxes ────────────────────────────────── */
+    .callout {
+      border-left: 4px solid #6366f1;
+      background: #f8faff;
+      padding: 12px 16px;
+      border-radius: 0 8px 8px 0;
+      margin: 14px 0;
+      color: #3730a3;
+      font-size: 12px;
+    }
+    .callout.warning {
+      border-color: #f59e0b;
+      background: #fffbeb;
+      color: #92400e;
+    }
+    .callout.success {
+      border-color: #10b981;
+      background: #ecfdf5;
+      color: #065f46;
+    }
+
+    /* ── Tables ───────────────────────────────────────── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0 20px;
+      font-size: 12px;
+    }
+    thead tr { background: #6366f1; color: #fff; }
+    thead th {
+      padding: 10px 12px;
+      text-align: left;
+      font-weight: 600;
+    }
+    tbody tr:nth-child(even) { background: #f8faff; }
+    tbody tr:nth-child(odd) { background: #fff; }
+    tbody td {
+      padding: 9px 12px;
+      border-bottom: 1px solid #e2e8f0;
+      color: #374151;
+    }
+    tbody td:first-child { font-weight: 500; color: #1e293b; }
+    .center { text-align: center; }
+    .tick { color: #10b981; font-weight: 700; font-size: 15px; }
+    .cross { color: #94a3b8; }
+
+    /* ── Flow Diagram ─────────────────────────────────── */
+    .flow {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin: 16px 0;
+    }
+    .flow-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+    .flow-line {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 32px;
+      flex-shrink: 0;
+    }
+    .flow-dot {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: #6366f1;
+      color: #fff;
+      font-weight: 700;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .flow-connector {
+      width: 2px;
+      height: 28px;
+      background: #c7d2fe;
+      margin: 2px 0;
+    }
+    .flow-content {
+      padding: 4px 0 24px;
+    }
+    .flow-content strong {
+      display: block;
+      font-size: 13px;
+      color: #1e293b;
+      margin-bottom: 3px;
+    }
+    .flow-content span {
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    /* ── Status Badges ────────────────────────────────── */
+    .badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      margin: 0 2px;
+    }
+    .badge-draft   { background: #f1f5f9; color: #64748b; }
+    .badge-active  { background: #dcfce7; color: #166534; }
+    .badge-closed  { background: #e0e7ff; color: #3730a3; }
+    .badge-pending { background: #fef9c3; color: #854d0e; }
+    .badge-paid    { background: #d1fae5; color: #065f46; }
+    .badge-rejected{ background: #fee2e2; color: #991b1b; }
+
+    /* ── Stack Grid ───────────────────────────────────── */
+    .stack-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin: 16px 0;
+    }
+    .stack-card {
+      background: #f8faff;
+      border: 1px solid #e0e7ff;
+      border-radius: 10px;
+      padding: 14px 12px;
+    }
+    .stack-card .layer {
+      font-size: 10px;
+      font-weight: 700;
+      color: #6366f1;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      margin-bottom: 4px;
+    }
+    .stack-card .tech {
+      font-size: 12px;
+      font-weight: 600;
+      color: #1e293b;
+    }
+    .stack-card .detail {
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 2px;
+    }
+
+    /* ── Feature Cards ────────────────────────────────── */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      margin: 16px 0;
+    }
+    .feature-card {
+      background: #f8faff;
+      border: 1px solid #e0e7ff;
+      border-radius: 10px;
+      padding: 14px;
+    }
+    .feature-card .feat-icon {
+      font-size: 20px;
+      margin-bottom: 8px;
+    }
+    .feature-card h3 {
+      margin: 0 0 6px;
+      font-size: 13px;
+      color: #1e293b;
+    }
+    .feature-card p {
+      font-size: 11.5px;
+      margin: 0;
+      color: #64748b;
+    }
+
+    /* ── Architecture Note ────────────────────────────── */
+    .arch-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .arch-row:last-child { border-bottom: none; }
+    .arch-row .label {
+      flex: 0 0 200px;
+      font-weight: 600;
+      color: #1e293b;
+      font-size: 12px;
+    }
+    .arch-row .desc {
+      flex: 1;
+      font-size: 12px;
+      color: #475569;
+    }
+
+    /* ── Footer ───────────────────────────────────────── */
+    .footer {
+      margin-top: 50px;
+      padding-top: 20px;
+      border-top: 1px solid #e2e8f0;
+      text-align: center;
+      font-size: 11px;
+      color: #94a3b8;
+    }
+  </style>
+</head>
+<body>
+
+<button class="print-btn no-print" onclick="window.print()">
+  Save as PDF
+</button>
+
+<div class="container">
+
+  <!-- ══════════════════════════════════════════
+       COVER
+  ══════════════════════════════════════════ -->
+  <div class="cover">
+    <div class="logo"><span>RS</span></div>
+    <h1>RoomSplit</h1>
+    <p class="subtitle">Smart rent splitting &amp; expense management for roommates</p>
+    <span class="version">Version 1.0 &nbsp;·&nbsp; March 2026 &nbsp;·&nbsp; India (INR / UPI)</span>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════
+       1. WHAT IS ROOMSPLIT
+  ══════════════════════════════════════════ -->
+  <h2><span class="icon">🏠</span> What is RoomSplit?</h2>
+
+  <p>
+    RoomSplit is a full-stack web application designed for roommates in India to manage
+    shared rent and household expenses with zero friction. An admin creates a group,
+    invites roommates, defines monthly rent cycles, and collects payments entirely through
+    UPI — no cash, no spreadsheets, no chasing people on WhatsApp.
+  </p>
+
+  <div class="callout success">
+    <strong>Key promise:</strong> Every rupee is tracked, every payment is audited, and
+    every roommate always knows exactly what they owe and what has been paid.
+  </div>
+
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="feat-icon">📱</div>
+      <h3>Phone OTP Login</h3>
+      <p>No passwords. Sign in with your Indian mobile number and a one-time code.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feat-icon">👥</div>
+      <h3>Group Management</h3>
+      <p>Create a group for your flat, invite roommates via a shareable code.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feat-icon">🔄</div>
+      <h3>Rent Cycles</h3>
+      <p>Admin creates a cycle each month. Rent is auto-split equally and each member gets a payment task.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feat-icon">₹</div>
+      <h3>UPI Payments</h3>
+      <p>QR code &amp; deep link generated per payment. Members scan and pay, then confirm with UTR.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feat-icon">💳</div>
+      <h3>Wallet &amp; Ledger</h3>
+      <p>Group wallet tracks total collected rent. Full ledger shows every credit and debit.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feat-icon">🧾</div>
+      <h3>Shared Expenses</h3>
+      <p>Log groceries, utilities, or any shared cost. Split equally with approval workflow.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feat-icon">🔔</div>
+      <h3>Notifications</h3>
+      <p>In-app alerts for rent due, payment confirmed, and next-day reminders.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feat-icon">📋</div>
+      <h3>Audit Trail</h3>
+      <p>Tamper-resistant log of every action in the group. Admins can review anytime.</p>
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════
+       2. TECH STACK
+  ══════════════════════════════════════════ -->
+  <div class="page-break"></div>
+  <h2><span class="icon">⚙️</span> Tech Stack</h2>
+
+  <div class="stack-grid">
+    <div class="stack-card">
+      <div class="layer">Backend</div>
+      <div class="tech">FastAPI 0.115</div>
+      <div class="detail">Python 3.12, async SQLAlchemy 2.0</div>
+    </div>
+    <div class="stack-card">
+      <div class="layer">Frontend</div>
+      <div class="tech">React 18 + TypeScript</div>
+      <div class="detail">Vite 6, Tailwind CSS, Radix UI</div>
+    </div>
+    <div class="stack-card">
+      <div class="layer">Database</div>
+      <div class="tech">PostgreSQL 16</div>
+      <div class="detail">asyncpg driver, Alembic migrations</div>
+    </div>
+    <div class="stack-card">
+      <div class="layer">Cache / Queue</div>
+      <div class="tech">Redis 7</div>
+      <div class="detail">Celery broker &amp; result backend</div>
+    </div>
+    <div class="stack-card">
+      <div class="layer">Background Tasks</div>
+      <div class="tech">Celery 5.4</div>
+      <div class="detail">Worker + Beat (scheduled jobs)</div>
+    </div>
+    <div class="stack-card">
+      <div class="layer">Auth</div>
+      <div class="tech">JWT + OTP</div>
+      <div class="detail">python-jose, Twilio (console in dev)</div>
+    </div>
+    <div class="stack-card">
+      <div class="layer">State (Client)</div>
+      <div class="tech">Zustand + TanStack Query</div>
+      <div class="detail">Auth store + server-state caching</div>
+    </div>
+    <div class="stack-card">
+      <div class="layer">Forms</div>
+      <div class="tech">React Hook Form + Zod</div>
+      <div class="detail">Type-safe validation</div>
+    </div>
+    <div class="stack-card">
+      <div class="layer">Infrastructure</div>
+      <div class="tech">Docker Compose + Nginx</div>
+      <div class="detail">6-container stack, one command setup</div>
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════
+       3. HOW AUTHENTICATION WORKS
+  ══════════════════════════════════════════ -->
+  <h2><span class="icon">🔐</span> How Authentication Works</h2>
+
+  <p>RoomSplit uses <strong>phone number + OTP</strong> — no passwords are stored.</p>
+
+  <div class="flow">
+    <div class="flow-step">
+      <div class="flow-line">
+        <div class="flow-dot">1</div>
+        <div class="flow-connector"></div>
+      </div>
+      <div class="flow-content">
+        <strong>User enters phone number</strong>
+        <span>10-digit Indian mobile, formatted as +91XXXXXXXXXX</span>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-line">
+        <div class="flow-dot">2</div>
+        <div class="flow-connector"></div>
+      </div>
+      <div class="flow-content">
+        <strong>OTP sent via Twilio (or printed to console in development)</strong>
+        <span>6-digit code, expires in 10 minutes</span>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-line">
+        <div class="flow-dot">3</div>
+        <div class="flow-connector"></div>
+      </div>
+      <div class="flow-content">
+        <strong>User submits OTP → server issues tokens</strong>
+        <span>Access token (JWT, 30 min) + Refresh token (SHA-256 hash, 30 days)</span>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-line">
+        <div class="flow-dot">4</div>
+        <div class="flow-connector"></div>
+      </div>
+      <div class="flow-content">
+        <strong>Access token kept in memory only (Zustand)</strong>
+        <span>Never stored in localStorage — protects against XSS attacks</span>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-line">
+        <div class="flow-dot">5</div>
+      </div>
+      <div class="flow-content">
+        <strong>On token expiry → silent refresh</strong>
+        <span>Refresh token in HTTP-only cookie → new access token issued automatically</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout">
+    New users are directed to a <strong>Profile Setup</strong> page (name + UPI ID) after their
+    first successful OTP verification before accessing the app.
+  </div>
+
+
+  <!-- ══════════════════════════════════════════
+       4. GROUPS & MEMBERS
+  ══════════════════════════════════════════ -->
+  <h2><span class="icon">👥</span> Groups &amp; Members</h2>
+
+  <p>
+    A <strong>Group</strong> represents a shared household. One user can belong to multiple groups.
+    The person who creates a group automatically becomes its <strong>Admin</strong>.
+  </p>
+
+  <h3>Creating a Group</h3>
+  <p>The admin fills in:</p>
+  <ul>
+    <li><strong>Group Name</strong> — e.g. "Flat 4B Residents"</li>
+    <li><strong>Rent Collection UPI ID</strong> — the UPI handle where rent payments are collected</li>
+    <li><strong>Cycle Type</strong> — <em>Monthly</em> (fixed billing day) or <em>Custom</em> (admin-managed)</li>
+    <li><strong>Billing Day</strong> — for monthly cycles, the day of month rent is due (1–28)</li>
+  </ul>
+
+  <h3>Inviting Members</h3>
+  <p>
+    Admin goes to <strong>Members → Invite Code</strong>. Roommates enter this code on the
+    <strong>Join Group</strong> page. Invite codes expire after 7 days; admin can refresh them anytime.
+  </p>
+
+  <h3>Member Management</h3>
+  <ul>
+    <li>Admin can <strong>remove members</strong> (except the group creator)</li>
+    <li>Admin can <strong>assign roles</strong> (Admin / Co-Admin / Member or custom)</li>
+    <li>Admin can <strong>suspend members</strong> — they remain in records but cannot participate</li>
+    <li>Admin can <strong>delete the group</strong> — soft delete, all data is preserved in the audit log</li>
+  </ul>
+
+
+  <!-- ══════════════════════════════════════════
+       5. RENT CYCLES
+  ══════════════════════════════════════════ -->
+  <div class="page-break"></div>
+  <h2><span class="icon">🔄</span> Rent Cycles</h2>
+
+  <p>
+    A <strong>Rent Cycle</strong> is a billing period (e.g. "March 2025"). <em>The group is
+    permanent — you create a new cycle each month, not a new group.</em>
+  </p>
+
+  <h3>Cycle Lifecycle</h3>
+
+  <div style="display:flex;gap:12px;align-items:center;margin:16px 0;flex-wrap:wrap;">
+    <span class="badge badge-draft">Draft</span>
+    <span style="color:#94a3b8;">→ activate →</span>
+    <span class="badge badge-active">Active</span>
+    <span style="color:#94a3b8;">→ close →</span>
+    <span class="badge badge-closed">Closed</span>
+  </div>
+
+  <div class="flow">
+    <div class="flow-step">
+      <div class="flow-line">
+        <div class="flow-dot">1</div>
+        <div class="flow-connector"></div>
+      </div>
+      <div class="flow-content">
+        <strong>Admin creates a Cycle (Draft)</strong>
+        <span>Sets label, period start/end, total rent amount (₹), and due date. Nothing is charged yet.</span>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-line">
+        <div class="flow-dot">2</div>
+        <div class="flow-connector"></div>
+      </div>
+      <div class="flow-content">
+        <strong>Admin activates the Cycle</strong>
+        <span>System divides total rent equally across all active members (remainder paise distributed to first members). A Payment record is created for each member and a "Rent Due" notification is sent.</span>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-line">
+        <div class="flow-dot">3</div>
+        <div class="flow-connector"></div>
+      </div>
+      <div class="flow-content">
+        <strong>Members pay their share</strong>
+        <span>Each member sees their payment, scans the UPI QR code or uses the deep link, pays, then marks it as paid with their UTR (bank reference number).</span>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-line">
+        <div class="flow-dot">4</div>
+        <div class="flow-connector"></div>
+      </div>
+      <div class="flow-content">
+        <strong>Admin confirms payments</strong>
+        <span>Admin verifies UTR and confirms. Wallet balance and ledger are updated. If auto-confirm is ON, this step is skipped.</span>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-line">
+        <div class="flow-dot">5</div>
+      </div>
+      <div class="flow-content">
+        <strong>Admin closes the Cycle</strong>
+        <span>Once the period ends, admin closes the cycle. Historical records remain accessible.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout warning">
+    <strong>Equal split only (Phase 1):</strong> Custom per-member splits are planned for Phase 2.
+    Currently the total is divided equally, with leftover paise distributed one paise at a time
+    to the first N members to ensure the total always adds up exactly.
+  </div>
+
+
+  <!-- ══════════════════════════════════════════
+       6. PAYMENT FLOW
+  ══════════════════════════════════════════ -->
+  <h2><span class="icon">₹</span> Payment Flow</h2>
+
+  <p>Each Payment record goes through the following states:</p>
+
+  <div style="display:flex;gap:10px;align-items:center;margin:14px 0;flex-wrap:wrap;">
+    <span class="badge badge-pending">Pending</span>
+    <span style="color:#94a3b8;">→ member marks paid →</span>
+    <span class="badge" style="background:#fde68a;color:#78350f;">Marked Paid</span>
+    <span style="color:#94a3b8;">→ admin confirms →</span>
+    <span class="badge badge-paid">Confirmed</span>
+  </div>
+  <div style="display:flex;gap:10px;align-items:center;margin:0 0 16px;flex-wrap:wrap;">
+    <span style="color:#94a3b8;padding-left:4px;">or →</span>
+    <span class="badge badge-rejected">Rejected</span>
+    <span style="color:#94a3b8;">(member must pay again)</span>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Step</th>
+        <th>Who</th>
+        <th>Action</th>
+        <th>Result</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td>System</td>
+        <td>Cycle activated</td>
+        <td>Payment created, UPI QR generated</td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>Member</td>
+        <td>Scans QR / taps UPI link, pays via bank app</td>
+        <td>Money transferred (outside app)</td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td>Member</td>
+        <td>Enters UTR, clicks "Mark as Paid"</td>
+        <td>Status → Marked Paid</td>
+      </tr>
+      <tr>
+        <td>4a</td>
+        <td>Admin</td>
+        <td>Verifies UTR in bank, clicks Confirm</td>
+        <td>Status → Confirmed, wallet credited</td>
+      </tr>
+      <tr>
+        <td>4b</td>
+        <td>Admin</td>
+        <td>UTR doesn't match, clicks Reject</td>
+        <td>Status → Rejected, member notified</td>
+      </tr>
+      <tr>
+        <td>Auto</td>
+        <td>System</td>
+        <td>auto_confirm_payments = ON</td>
+        <td>Step 4 is skipped; confirmed automatically</td>
+      </tr>
+    </tbody>
+  </table>
+
+
+  <!-- ══════════════════════════════════════════
+       7. WALLET & LEDGER
+  ══════════════════════════════════════════ -->
+  <h2><span class="icon">💳</span> Wallet &amp; Ledger</h2>
+
+  <p>
+    Each group has a <strong>Group Wallet</strong> that accumulates confirmed rent payments.
+    The <strong>Ledger</strong> is an immutable list of every credit and debit transaction.
+  </p>
+
+  <ul>
+    <li><strong>Credit</strong> — when a member's payment is confirmed, the amount is credited to the group wallet</li>
+    <li><strong>Debit</strong> — when a withdrawal is approved, the amount is debited from the wallet</li>
+    <li>All amounts are stored as <strong>integer paise</strong> (1 ₹ = 100 paise) — never as floating-point numbers</li>
+    <li>Concurrent wallet updates use <code>SELECT FOR UPDATE</code> to prevent race conditions</li>
+  </ul>
+
+  <h3>Withdrawals</h3>
+  <p>
+    Admin can request a withdrawal from the wallet (e.g. to pay the landlord). Another admin
+    or co-admin approves it. Once approved, the wallet balance is reduced and a debit ledger
+    entry is created.
+  </p>
+
+
+  <!-- ══════════════════════════════════════════
+       8. ROLES & PERMISSIONS
+  ══════════════════════════════════════════ -->
+  <div class="page-break"></div>
+  <h2><span class="icon">🛡️</span> Roles &amp; Permissions</h2>
+
+  <p>
+    Every group has three built-in system roles. Custom roles with any combination of
+    permissions can also be created by the admin.
+  </p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Permission</th>
+        <th class="center">Admin</th>
+        <th class="center">Co-Admin</th>
+        <th class="center">Member</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Edit group settings / Delete group</td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="cross">—</span></td><td class="center"><span class="cross">—</span></td></tr>
+      <tr><td>Create &amp; activate rent cycles</td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="cross">—</span></td></tr>
+      <tr><td>Close rent cycles</td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="cross">—</span></td></tr>
+      <tr><td>Confirm / reject payments</td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="cross">—</span></td></tr>
+      <tr><td>Invite members</td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="cross">—</span></td></tr>
+      <tr><td>Remove members</td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="cross">—</span></td><td class="center"><span class="cross">—</span></td></tr>
+      <tr><td>Assign roles</td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="cross">—</span></td><td class="center"><span class="cross">—</span></td></tr>
+      <tr><td>Create &amp; delete expenses</td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td></tr>
+      <tr><td>Approve expenses</td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="cross">—</span></td></tr>
+      <tr><td>View audit logs</td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="cross">—</span></td></tr>
+      <tr><td>View analytics</td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td></tr>
+      <tr><td>Request &amp; approve withdrawals</td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="cross">—</span></td><td class="center"><span class="cross">—</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    The group <strong>creator</strong> can never be removed from the group — even by another admin.
+    This prevents accidental lockout.
+  </div>
+
+
+  <!-- ══════════════════════════════════════════
+       9. NOTIFICATIONS & BACKGROUND TASKS
+  ══════════════════════════════════════════ -->
+  <h2><span class="icon">🔔</span> Notifications &amp; Background Tasks</h2>
+
+  <h3>In-App Notifications</h3>
+  <p>Notifications are shown in a slide-in drawer (top-right bell icon). They are triggered for:</p>
+  <ul>
+    <li><strong>rent_due</strong> — when admin activates a cycle</li>
+    <li><strong>payment_confirmed</strong> — when admin confirms your payment</li>
+    <li><strong>payment_rejected</strong> — when admin rejects your payment</li>
+    <li><strong>payment_reminder</strong> — 1 day before the due date (Celery daily task)</li>
+  </ul>
+
+  <h3>Scheduled Celery Tasks (run daily)</h3>
+  <table>
+    <thead>
+      <tr><th>Task</th><th>What it does</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>send_payment_reminders</td>
+        <td>Finds active cycles due tomorrow → notifies all members with pending payments</td>
+      </tr>
+      <tr>
+        <td>expire_overdue_payments_task</td>
+        <td>Marks pending payments as expired if due date passed more than 7 days ago</td>
+      </tr>
+    </tbody>
+  </table>
+
+
+  <!-- ══════════════════════════════════════════
+       10. ARCHITECTURE DECISIONS
+  ══════════════════════════════════════════ -->
+  <h2><span class="icon">🏗️</span> Key Architecture Decisions</h2>
+
+  <div class="arch-row">
+    <div class="label">Money stored as paise (integer)</div>
+    <div class="desc">All currency values are BigInteger paise (1 ₹ = 100 paise). Floats are never used internally. Conversion to ₹ happens only at the API boundary. This eliminates floating-point rounding errors on INR calculations.</div>
+  </div>
+  <div class="arch-row">
+    <div class="label">Payment state machine</div>
+    <div class="desc">A <code>VALID_TRANSITIONS</code> dict enforces legal state changes (e.g. pending → marked_paid is valid; confirmed → pending is not). This prevents data corruption from concurrent or out-of-order API calls.</div>
+  </div>
+  <div class="arch-row">
+    <div class="label">Wallet SELECT FOR UPDATE</div>
+    <div class="desc">Wallet balance updates use row-level locking to prevent two simultaneous confirmations from both crediting the same amount, which would create a double-count bug.</div>
+  </div>
+  <div class="arch-row">
+    <div class="label">Audit log PostgreSQL RULE</div>
+    <div class="desc">A DB-level RULE blocks UPDATE and DELETE on the audit_logs table. Even if application code has a bug, the audit trail cannot be tampered with — it is append-only at the database level.</div>
+  </div>
+  <div class="arch-row">
+    <div class="label">Refresh tokens as SHA-256 hashes</div>
+    <div class="desc">Raw refresh tokens are never stored. Only their SHA-256 hash is saved. If the sessions table is leaked, attackers cannot use the hashed values to authenticate.</div>
+  </div>
+  <div class="arch-row">
+    <div class="label">Access tokens in memory only</div>
+    <div class="desc">JWT access tokens are stored in Zustand (in-memory), never in localStorage or cookies. This limits the XSS attack surface — a malicious script cannot steal the token by reading storage APIs.</div>
+  </div>
+  <div class="arch-row">
+    <div class="label">RBAC resolved at query time</div>
+    <div class="desc">Permissions are always fetched live from the DB on each request. There is no permission cache to invalidate. Changing a member's role takes effect immediately on the next API call.</div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════
+       11. SETUP & DEPLOYMENT
+  ══════════════════════════════════════════ -->
+  <div class="page-break"></div>
+  <h2><span class="icon">🚀</span> Setup &amp; Deployment</h2>
+
+  <h3>Quick Start (Docker)</h3>
+  <p>One command starts the entire stack (PostgreSQL, Redis, Backend, Celery, Frontend, Nginx):</p>
+
+  <div style="background:#0f172a;color:#e2e8f0;border-radius:10px;padding:16px 20px;font-family:monospace;font-size:12px;margin:12px 0;">
+    <span style="color:#94a3b8;"># 1. Clone &amp; configure</span><br/>
+    git clone https://github.com/your-username/roomsplit.git &amp;&amp; cd roomsplit<br/>
+    cp .env.example .env<br/><br/>
+    <span style="color:#94a3b8;"># 2. Start everything</span><br/>
+    docker-compose up --build<br/><br/>
+    <span style="color:#94a3b8;"># App is live at http://localhost:8080</span><br/>
+    <span style="color:#94a3b8;"># API docs at  http://localhost:8000/docs</span>
+  </div>
+
+  <h3>Service Ports</h3>
+  <table>
+    <thead><tr><th>Service</th><th>Port</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td>Nginx (reverse proxy)</td><td>8080</td><td>Main entry point for the app</td></tr>
+      <tr><td>Frontend (Vite)</td><td>5173</td><td>React dev server</td></tr>
+      <tr><td>Backend (FastAPI)</td><td>8000</td><td>REST API + Swagger docs</td></tr>
+      <tr><td>PostgreSQL</td><td>5432</td><td>Primary database</td></tr>
+      <tr><td>Redis</td><td>6379</td><td>Cache + Celery broker</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Key Environment Variables</h3>
+  <table>
+    <thead><tr><th>Variable</th><th>Default</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td>APP_ENV</td><td>development</td><td>Set to <code>production</code> to hide API docs</td></tr>
+      <tr><td>SECRET_KEY</td><td>—</td><td>JWT signing secret (min 32 chars)</td></tr>
+      <tr><td>OTP_PROVIDER</td><td>console</td><td>Use <code>twilio</code> in production</td></tr>
+      <tr><td>DATABASE_URL</td><td>—</td><td>PostgreSQL asyncpg connection string</td></tr>
+      <tr><td>REDIS_URL</td><td>—</td><td>Redis connection string</td></tr>
+    </tbody>
+  </table>
+
+
+  <!-- ══════════════════════════════════════════
+       12. ROADMAP
+  ══════════════════════════════════════════ -->
+  <h2><span class="icon">🗺️</span> Roadmap</h2>
+
+  <table>
+    <thead><tr><th>Phase</th><th>Feature</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>Phase 1</td><td>Auth, Groups, RBAC, Rent Cycles, UPI Payments, Wallet, Ledger, Expenses, Audit, Notifications, Analytics</td><td><span class="badge badge-paid">Complete</span></td></tr>
+      <tr><td>Phase 2</td><td>Custom rent splits (not just equal)</td><td><span class="badge badge-pending">Planned</span></td></tr>
+      <tr><td>Phase 2</td><td>Auto-creation of monthly cycles (Celery)</td><td><span class="badge badge-pending">Planned</span></td></tr>
+      <tr><td>Phase 2</td><td>Analytics charts (Recharts)</td><td><span class="badge badge-pending">Planned</span></td></tr>
+      <tr><td>Phase 2</td><td>CSV export for ledger &amp; payments</td><td><span class="badge badge-pending">Planned</span></td></tr>
+      <tr><td>Phase 2</td><td>Progressive Web App (PWA)</td><td><span class="badge badge-pending">Planned</span></td></tr>
+      <tr><td>Phase 3</td><td>AWS / Azure deployment guide</td><td><span class="badge badge-draft">Future</span></td></tr>
+      <tr><td>Phase 3</td><td>Push notifications (FCM)</td><td><span class="badge badge-draft">Future</span></td></tr>
+      <tr><td>Phase 3</td><td>Real Twilio OTP integration</td><td><span class="badge badge-draft">Future</span></td></tr>
+    </tbody>
+  </table>
+
+
+  <!-- ══════════════════════════════════════════
+       FOOTER
+  ══════════════════════════════════════════ -->
+  <div class="footer">
+    RoomSplit v1.0 &nbsp;·&nbsp; Built with FastAPI + React + PostgreSQL &nbsp;·&nbsp; INR / UPI &nbsp;·&nbsp; March 2026<br/>
+    <span style="margin-top:4px;display:block;">This document was generated from the live codebase. Open in browser and click <strong>Save as PDF</strong> to export.</span>
+  </div>
+
+</div>
+</body>
+</html>
