@@ -1,225 +1,233 @@
-# Railway Deployment Guide — RoomSplit
+# How to Deploy RoomSplit on Railway
 
-## Architecture on Railway
+## What you will deploy
+
+| # | Service | What it does |
+|---|---------|-------------|
+| 1 | PostgreSQL | Database |
+| 2 | Redis | Background job queue |
+| 3 | Backend | The API server (FastAPI) |
+| 4 | Celery Worker | Runs background jobs |
+| 5 | Celery Beat | Runs scheduled jobs (daily reminders) |
+| 6 | Frontend | The website (React) |
+
+---
+
+## STEP 1 — Create a Railway account
+
+1. Go to **https://railway.app**
+2. Click **Login** → **Login with GitHub**
+3. Authorize Railway to access your GitHub
+
+---
+
+## STEP 2 — Create a new project
+
+1. Click the **+ New Project** button
+2. Select **Empty Project**
+3. You will see an empty canvas — this is your project
+
+---
+
+## STEP 3 — Add PostgreSQL database
+
+1. Click **+ Add a service** (or the **+** button on the canvas)
+2. Select **Database**
+3. Select **Add PostgreSQL**
+4. A PostgreSQL box appears on the canvas ✅
+
+---
+
+## STEP 4 — Add Redis
+
+1. Click **+** again
+2. Select **Database**
+3. Select **Add Redis**
+4. A Redis box appears on the canvas ✅
+
+---
+
+## STEP 5 — Deploy the Backend (API server)
+
+### 5a. Create the service
+1. Click **+** on the canvas
+2. Select **GitHub Repo**
+3. Select **room_Split_web_app**
+4. Click **Add service** — do NOT deploy yet
+
+### 5b. Set the Root Directory ⬅ THIS IS IMPORTANT
+1. Click on the new service card
+2. Click the **Settings** tab
+3. Scroll down to **Build** section
+4. Find **Root Directory** → type exactly:
+   ```
+   roomsplit/backend
+   ```
+5. Press **Enter** to save
+
+### 5c. Add environment variables
+1. Click the **Variables** tab
+2. Add these variables one by one (click **+ New Variable** for each):
 
 ```
-Railway Project: RoomSplit
-├── 🐘 PostgreSQL          (managed plugin)
-├── 🔴 Redis               (managed plugin)
-├── ⚡ backend             (FastAPI — roomsplit/backend)
-├── 👷 celery-worker       (Celery worker — roomsplit/backend)
-├── 🕐 celery-beat         (Celery scheduler — roomsplit/backend)
-└── 🌐 frontend            (React + Nginx — roomsplit/frontend)
+APP_ENV                  =  production
+SECRET_KEY               =  (copy the value below)
+DATABASE_URL             =  ${{Postgres.DATABASE_URL}}
+REDIS_URL                =  ${{Redis.REDIS_URL}}
+CELERY_BROKER_URL        =  ${{Redis.REDIS_URL}}
+CELERY_RESULT_BACKEND    =  ${{Redis.REDIS_URL}}
+OTP_PROVIDER             =  console
+ACCESS_TOKEN_EXPIRE_MINUTES = 15
+REFRESH_TOKEN_EXPIRE_DAYS   = 30
+ALLOWED_ORIGINS          =  (leave blank for now — fill in Step 7)
+FRONTEND_URL             =  (leave blank for now — fill in Step 7)
 ```
 
----
+> **How to generate SECRET_KEY:**
+> Go to https://generate-secret.vercel.app/64
+> Copy the generated string and paste it as the value
 
-## Step 1 — Create Railway Account & Project
+> **What is ${{Postgres.DATABASE_URL}}?**
+> Type it exactly like that — Railway will automatically replace it
+> with your real database URL. You do NOT need to copy-paste the actual URL.
 
-1. Go to [railway.app](https://railway.app) and sign up with GitHub
-2. Click **New Project**
-3. Choose **Empty project**
-4. Name it `RoomSplit`
-
----
-
-## Step 2 — Add PostgreSQL
-
-1. In your Railway project, click **+ New** → **Database** → **Add PostgreSQL**
-2. Railway will create the database and provide connection variables automatically
-3. Note the variable name: `DATABASE_URL` (auto-set by Railway)
-
----
-
-## Step 3 — Add Redis
-
-1. Click **+ New** → **Database** → **Add Redis**
-2. Railway will provide `REDIS_URL` automatically
+### 5d. Deploy
+1. Click the **Deploy** button
+2. Click **Logs** tab — wait for:
+   ```
+   ✓ Migrations complete
+   ✓ Starting FastAPI server
+   ```
+3. Copy the backend URL shown at the top (looks like `https://xxx.up.railway.app`)
 
 ---
 
-## Step 4 — Deploy the Backend
+## STEP 6 — Deploy the Frontend (website)
 
-1. Click **+ New** → **GitHub Repo**
-2. Select your `room_Split_web_app` repository
-3. Under **Root Directory**, set it to: `roomsplit/backend`
-4. Railway will detect the `Dockerfile` and `railway.toml` automatically
-5. Rename this service to `backend`
+### 6a. Create the service
+1. Click **+** on the canvas
+2. Select **GitHub Repo**
+3. Select **room_Split_web_app** again
+4. Click **Add service** — do NOT deploy yet
 
-### Set Backend Environment Variables
+### 6b. Set the Root Directory ⬅ IMPORTANT
+1. Click the new service card
+2. Click **Settings** tab
+3. Scroll to **Build** section
+4. Find **Root Directory** → type exactly:
+   ```
+   roomsplit/frontend
+   ```
+5. Press **Enter** to save
 
-In the backend service → **Variables** tab, add:
+### 6c. Add environment variable
+1. Click the **Variables** tab
+2. Add ONE variable:
 
-| Variable | Value |
-|----------|-------|
-| `APP_ENV` | `production` |
-| `SECRET_KEY` | *(generate with `openssl rand -hex 32`)* |
-| `DATABASE_URL` | `${{Postgres.DATABASE_URL}}` |
-| `DATABASE_URL_SYNC` | *(leave blank — auto-set by start.sh)* |
-| `REDIS_URL` | `${{Redis.REDIS_URL}}` |
-| `CELERY_BROKER_URL` | `${{Redis.REDIS_URL}}` |
-| `CELERY_RESULT_BACKEND` | `${{Redis.REDIS_URL}}` |
-| `OTP_PROVIDER` | `twilio` *(or `console` for testing)* |
-| `TWILIO_ACCOUNT_SID` | *(your Twilio SID)* |
-| `TWILIO_AUTH_TOKEN` | *(your Twilio auth token)* |
-| `TWILIO_FROM_NUMBER` | *(your Twilio phone number)* |
-| `ALLOWED_ORIGINS` | *(set after frontend is deployed — see Step 6)* |
-| `FRONTEND_URL` | *(set after frontend is deployed — see Step 6)* |
-| `ACCESS_TOKEN_EXPIRE_MINUTES` | `15` |
-| `REFRESH_TOKEN_EXPIRE_DAYS` | `30` |
+```
+BACKEND_URL  =  https://xxx.up.railway.app
+```
+> Replace `https://xxx.up.railway.app` with the backend URL you copied in Step 5d
 
-> **How to use Railway variable references:**
-> Type `${{Postgres.DATABASE_URL}}` exactly — Railway replaces this with the actual
-> PostgreSQL URL at runtime. No copy-pasting of credentials needed.
-
-6. Click **Deploy** — Railway will build the Docker image, run migrations, and start the server
-7. Once deployed, copy the backend's **public URL** (e.g. `https://backend-production-xxxx.up.railway.app`)
+### 6d. Deploy
+1. Click **Deploy**
+2. Wait for build to complete
+3. Copy the frontend URL (looks like `https://yyy.up.railway.app`)
 
 ---
 
-## Step 5 — Deploy Celery Worker & Beat
+## STEP 7 — Update backend with frontend URL
 
-These reuse the **same Docker image** as the backend but with different start commands.
+Now that you have the frontend URL, go back to the **backend** service:
 
-### Celery Worker
+1. Click the backend service card
+2. Click **Variables** tab
+3. Update these two variables:
 
-1. Click **+ New** → **GitHub Repo** → same repository
-2. Set **Root Directory** to: `roomsplit/backend`
-3. Rename service to `celery-worker`
-4. Go to **Settings** → **Deploy** → **Custom Start Command**, set:
+```
+ALLOWED_ORIGINS  =  ["https://yyy.up.railway.app"]
+FRONTEND_URL     =  https://yyy.up.railway.app
+```
+> Replace `https://yyy.up.railway.app` with your real frontend URL
+
+4. Click **Deploy** to apply the changes
+
+---
+
+## STEP 8 — Deploy Celery Worker
+
+1. Click **+** on the canvas
+2. Select **GitHub Repo** → **room_Split_web_app**
+3. Click **Add service**
+
+### Set Root Directory
+1. Click **Settings** tab
+2. Set **Root Directory** to:
+   ```
+   roomsplit/backend
+   ```
+
+### Set Custom Start Command
+1. Still in **Settings**, scroll to **Deploy** section
+2. Find **Custom Start Command** → type:
    ```
    ./start_worker.sh
    ```
-5. Add the **same environment variables** as the backend (copy them)
 
-### Celery Beat
-
-1. Click **+ New** → **GitHub Repo** → same repository
-2. Set **Root Directory** to: `roomsplit/backend`
-3. Rename service to `celery-beat`
-4. Go to **Settings** → **Deploy** → **Custom Start Command**, set:
-   ```
-   ./start_beat.sh
-   ```
-5. Add the **same environment variables** as the backend
-
----
-
-## Step 6 — Deploy the Frontend
-
-1. Click **+ New** → **GitHub Repo** → same repository
-2. Set **Root Directory** to: `roomsplit/frontend`
-3. Railway will detect the `Dockerfile` and `railway.toml` automatically
-4. Rename the service to `frontend`
-
-### Set Frontend Environment Variable
-
-In the frontend service → **Variables** tab, add:
-
-| Variable | Value |
-|----------|-------|
-| `BACKEND_URL` | `https://your-backend-url.up.railway.app` *(the backend public URL from Step 4)* |
-
-> This variable is injected into the Nginx config at startup.
-> It tells Nginx where to proxy `/api/` requests.
-
-5. Click **Deploy**
-6. Once deployed, copy the frontend's **public URL** (e.g. `https://frontend-production-xxxx.up.railway.app`)
-
----
-
-## Step 7 — Update CORS on Backend
-
-Now that you have the frontend URL, go back to the **backend** service → **Variables** and update:
-
-| Variable | Value |
-|----------|-------|
-| `ALLOWED_ORIGINS` | `["https://your-frontend-url.up.railway.app"]` |
-| `FRONTEND_URL` | `https://your-frontend-url.up.railway.app` |
-
-Redeploy the backend after updating these values.
-
----
-
-## Step 8 — Verify Deployment
-
-Open your frontend URL in the browser. To verify each service:
-
+### Add Variables
+1. Click **Variables** tab
+2. Click **Shared Variables** or add the same variables as the backend:
 ```
-✅ Frontend  →  https://your-frontend-url.up.railway.app
-✅ Backend   →  https://your-backend-url.up.railway.app/health
-✅ API Docs  →  (disabled in production — set APP_ENV=development to re-enable)
+APP_ENV               =  production
+SECRET_KEY            =  (same value as backend)
+DATABASE_URL          =  ${{Postgres.DATABASE_URL}}
+REDIS_URL             =  ${{Redis.REDIS_URL}}
+CELERY_BROKER_URL     =  ${{Redis.REDIS_URL}}
+CELERY_RESULT_BACKEND =  ${{Redis.REDIS_URL}}
 ```
 
-### Test the full flow:
-1. Enter your phone number on the login page
-2. If `OTP_PROVIDER=console`, check the **backend service logs** in Railway for the OTP code
-3. Enter the OTP → you should be redirected to Profile Setup
-4. Create a group and verify rent cycles work
+3. Click **Deploy**
 
 ---
 
-## Environment Variable Reference (Complete)
+## STEP 9 — Deploy Celery Beat
 
-### Backend / Celery Worker / Celery Beat
-
-```env
-APP_NAME=RoomSplit
-APP_ENV=production
-SECRET_KEY=<generate: openssl rand -hex 32>
-ACCESS_TOKEN_EXPIRE_MINUTES=15
-REFRESH_TOKEN_EXPIRE_DAYS=30
-
-DATABASE_URL=${{Postgres.DATABASE_URL}}
-REDIS_URL=${{Redis.REDIS_URL}}
-CELERY_BROKER_URL=${{Redis.REDIS_URL}}
-CELERY_RESULT_BACKEND=${{Redis.REDIS_URL}}
-
-OTP_PROVIDER=twilio
-TWILIO_ACCOUNT_SID=<your sid>
-TWILIO_AUTH_TOKEN=<your token>
-TWILIO_FROM_NUMBER=<your number>
-
-FRONTEND_URL=https://your-frontend-url.up.railway.app
-ALLOWED_ORIGINS=["https://your-frontend-url.up.railway.app"]
+Repeat Step 8 but use this start command instead:
 ```
-
-### Frontend
-
-```env
-BACKEND_URL=https://your-backend-url.up.railway.app
+./start_beat.sh
 ```
 
 ---
 
-## Auto-Deploy on Git Push
+## STEP 10 — Open your app
 
-Railway automatically redeploys all services when you push to `main`.
+Go to your **frontend URL** in the browser.
 
-```bash
-git add .
-git commit -m "your changes"
-git push origin main
-# → Railway detects the push and redeploys all services automatically
-```
-
----
-
-## Logs & Debugging
-
-- View real-time logs for any service in the Railway dashboard → service → **Logs** tab
-- If migrations fail, check the backend logs for Alembic errors
-- If the frontend shows a blank page, check the browser console for API errors
-- If OTP isn't working, temporarily set `OTP_PROVIDER=console` and check backend logs
+**Test it works:**
+1. Enter your phone number
+2. Since `OTP_PROVIDER=console`, go to **backend service → Logs tab**
+3. Look for a line like: `OTP for +91XXXXXXXXXX: 123456`
+4. Enter that code on the website
+5. You should reach the Profile Setup page ✅
 
 ---
 
-## Cost Estimate (Railway)
+## Something went wrong?
 
-| Plan | Free Credit | Enough for |
-|------|------------|-----------|
-| Hobby ($5/mo) | $5 credit/mo | All 6 services for demo/testing |
-| Pro ($20/mo) | Unlimited | Production use |
+| Problem | Solution |
+|---------|----------|
+| Build fails with "Railpack" error | Root Directory not set — go to Settings → Build → Root Directory |
+| App opens but API calls fail | BACKEND_URL in frontend is wrong or ALLOWED_ORIGINS not updated |
+| Can't receive OTP | Check backend Logs tab — OTP is printed there when OTP_PROVIDER=console |
+| Database errors | Check backend Logs — migrations may have failed |
 
-> The free Hobby tier gives $5 of compute credit per month — enough to run all
-> services at low traffic. PostgreSQL and Redis plugins count toward this credit.
+---
+
+## Summary of Root Directory settings
+
+| Service | Root Directory | Start Command |
+|---------|---------------|---------------|
+| Backend | `roomsplit/backend` | (default — uses railway.toml) |
+| Frontend | `roomsplit/frontend` | (default — uses railway.toml) |
+| Celery Worker | `roomsplit/backend` | `./start_worker.sh` |
+| Celery Beat | `roomsplit/backend` | `./start_beat.sh` |
