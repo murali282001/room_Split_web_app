@@ -1,3 +1,5 @@
+import json
+from pydantic import field_validator
 from pydantic_settings import BaseSettings
 from typing import Optional
 
@@ -33,6 +35,19 @@ class Settings(BaseSettings):
     CELERY_RESULT_BACKEND: str = "redis://redis:6379/2"
 
     model_config = {"env_file": ".env", "extra": "ignore"}
+
+    @field_validator("ALLOWED_ORIGINS", mode="before")
+    @classmethod
+    def parse_allowed_origins(cls, v):
+        if not v:
+            return ["http://localhost:5173", "http://localhost:80"]
+        if isinstance(v, list):
+            return v
+        v = v.strip()
+        if v.startswith("["):
+            return json.loads(v)
+        # comma-separated: https://foo.com,https://bar.com
+        return [origin.strip() for origin in v.split(",") if origin.strip()]
 
 
 settings = Settings()
